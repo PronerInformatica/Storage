@@ -22,6 +22,7 @@ class Ftp implements DriversInterface
         if(@ftp_login($this->conection, $login, $password) === false){
             throw new \Exception("Credenciais nao aceitas");
         }
+        ftp_pasv($this->conection, TRUE);
     }
 
     public function get($file,$path,$name,$absolutePath = false)
