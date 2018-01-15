@@ -1,0 +1,21 @@
+{
+  "name": "proner/storage",
+  "description": "Lib para gerenciamentos de arquivos remotos",
+  "authors": [
+    {
+      "name": "Diogo Bemfica",
+      "email": "diogo@proner.com.br"
+    }
+  ],
+  "autoload": {
+    "psr-4": {"Proner\\Storage\\": "./src"}
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.4"
+  }
+}
