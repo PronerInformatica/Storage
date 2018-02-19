@@ -48,7 +48,9 @@ class Ftp implements DriversInterface
         if (@ftp_get($this->conection, $fileLocal, $fileRemote, FTP_BINARY)) {
             return true;
         } else {
-            unlink($fileLocal);
+            if (file_exists($fileLocal)) {
+                unlink($fileLocal);
+            }
             throw new \Exception("Erro ao baixar o arquivo");
         }
     }

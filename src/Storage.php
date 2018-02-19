@@ -81,7 +81,9 @@ class Storage
             $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
             $this->get($file,$pathTemp,$tempFile,true);
             $content = file_get_contents($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
-            unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
+            if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
+                unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
+            }
             return $content;
         }catch (\Exception $e){
             throw new \Exception($e->getMessage());
@@ -107,7 +109,9 @@ class Storage
             $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
             file_put_contents($pathTemp . DIRECTORY_SEPARATOR. $tempFile, $content);
             $this->put($pathTemp . DIRECTORY_SEPARATOR. $tempFile,dirname($file),basename($file),true);
-            unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
+            if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
+                unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
+            }
         }catch (\Exception $e){
             throw new \Exception($e->getMessage());
         }
