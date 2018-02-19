@@ -51,7 +51,7 @@ class Ftp implements DriversInterface
             if (file_exists($fileLocal)) {
                 unlink($fileLocal);
             }
-            throw new \Exception("Erro ao baixar o arquivo");
+            throw new \Exception("Erro ao baixar o arquivo ".$file);
         }
     }
 
