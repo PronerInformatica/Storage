@@ -73,7 +73,7 @@ class Ftp implements DriversInterface
             $fileRemote = $_ENV['PSTORAGE_WORKDIR_REMOTE'] . '/' . $path . '/' . $nameFileRemote;
         }
 
-        if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_ASCII)) {
+        if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_BINARY)) {
             return true;
         } else {
             throw new \Exception("Erro ao enviar o arquivo");
