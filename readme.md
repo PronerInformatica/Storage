@@ -28,6 +28,19 @@ $content = Storage::getContent('temp.txt');
 Storage::put('conteudo','Storage/temp.txt');
 ```
 
+## Metodos
+Metodo: **fileExists** localiza um arquivo no diretorio passado
+```php
+<?php
+$file = 'teste.txt'; //Arquivo que está procurando
+$path = 'pasta'; //Diretorio que está procurando o arquivo
+
+$storage->fileExists($file, $path);
+
+//OU
+Storage::fileExists($file, $path);
+```
+
 ## Variaveis de ambiente
 Variavel para difinir o driver(ftp default)
 ```

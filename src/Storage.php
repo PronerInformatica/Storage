@@ -13,8 +13,8 @@ class Storage
     private $password;
     private $driver;
 
-    public function __construct($driver = 'ftp'){
-
+    public function __construct($driver = 'ftp')
+    {
         $this->driver = $driver;
         switch ($driver) {
             case null:
@@ -26,17 +26,17 @@ class Storage
         }
 
         //TRATAMENTO DO WORKDIR
-        if( $_ENV['PSTORAGE_WORKDIR_LOCAL'] !== null){
+        if ($_ENV['PSTORAGE_WORKDIR_LOCAL'] !== null) {
             $_ENV['PSTORAGE_WORKDIR_LOCAL'] = $this->directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
         }
-        if( $_ENV['PSTORAGE_WORKDIR_LOCAL'] === null){
+        if ($_ENV['PSTORAGE_WORKDIR_LOCAL'] === null) {
             $_ENV['PSTORAGE_WORKDIR_LOCAL'] = ".";
         }
 
-        if( $_ENV['PSTORAGE_WORKDIR_REMOTE'] !== null){
+        if ($_ENV['PSTORAGE_WORKDIR_REMOTE'] !== null) {
             $_ENV['PSTORAGE_WORKDIR_REMOTE'] = "./".$_ENV['PSTORAGE_WORKDIR_REMOTE'];
         }
-        if( $_ENV['PSTORAGE_WORKDIR_REMOTE'] === null){
+        if ($_ENV['PSTORAGE_WORKDIR_REMOTE'] === null) {
             $_ENV['PSTORAGE_WORKDIR_REMOTE'] = ".";
         }
     }
@@ -46,7 +46,7 @@ class Storage
         $this->host = $host;
     }
 
-    public function setLogin($login,$password)
+    public function setLogin($login, $password)
     {
         $this->login = $login;
         $this->password = $password;
@@ -64,55 +64,68 @@ class Storage
 
     public function get($file, $path = null, $name = null, $absolutePath = false)
     {
-        try{
+        try {
             $this->driver->connect($this->host);
-            $this->driver->login($this->login,$this->password);
-            $this->driver->get($file,$path,$name,$absolutePath);
+            $this->driver->login($this->login, $this->password);
+            $this->driver->get($file, $path, $name, $absolutePath);
             $this->driver->close();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
 
     public function getContent($file)
     {
-        try{
+        try {
             $tempFile = md5(rand(0, 99999999));
             $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
-            $this->get($file,$pathTemp,$tempFile,true);
+            $this->get($file, $pathTemp, $tempFile, true);
             $content = file_get_contents($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
             if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
                 unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
             }
             return $content;
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
 
     public function put($file, $path = null, $name = null, $absolutePath = false)
     {
-        try{
+        try {
             $this->driver->connect($this->host);
-            $this->driver->login($this->login,$this->password);
-            $this->driver->put($file,$path,$name,$absolutePath);
+            $this->driver->login($this->login, $this->password);
+            $this->driver->put($file, $path, $name, $absolutePath);
             $this->driver->close();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
 
-    public function putContent($content,$file)
+    public function putContent($content, $file)
     {
-        try{
+        try {
             $tempFile = md5(rand(0, 99999999));
             $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
-            file_put_contents($pathTemp . DIRECTORY_SEPARATOR. $tempFile, $content);
-            $this->put($pathTemp . DIRECTORY_SEPARATOR. $tempFile,dirname($file),basename($file),true);
+            file_put_contents($pathTemp . DIRECTORY_SEPARATOR . $tempFile, $content);
+            $this->put($pathTemp . DIRECTORY_SEPARATOR. $tempFile, dirname($file), basename($file), true);
             if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
-                unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
+                unlink($pathTemp . DIRECTORY_SEPARATOR . $tempFile);
             }
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function fileExists($file, $path)
+    {
+        try {
+            $this->driver->connect($this->host);
+            $this->driver->login($this->login, $this->password);
+            $return = $this->driver->fileExists($file, $path);
+            $this->driver->close();
+            return $return;
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
