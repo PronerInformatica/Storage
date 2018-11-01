@@ -8,7 +8,7 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="SupergerCompras">
+        <testsuite name="Storage">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

@@ -1,46 +1,66 @@
 <?php
 namespace Proner\Storage\Drivers;
 
+use Exception;
 use Proner\Storage\StorageTrait;
 
 class Ftp implements DriversInterface
 {
     use StorageTrait;
 
-    protected $conection;
+    private $storage;
+    private $conection;
 
+    public function __construct($storage)
+    {
+        $this->storage = $storage;
+    }
+
+    /**
+     * @param $host
+     * @throws Exception
+     */
     public function connect($host)
     {
         @$this->conection = ftp_connect($host);
         if ($this->conection === false) {
-            throw new \Exception("Falha ao conectar com o host");
+            throw new Exception("Failed to connect to host");
         }
     }
 
+    /**
+     * @param $login
+     * @param $password
+     * @throws Exception
+     */
     public function login($login, $password)
     {
         if (@ftp_login($this->conection, $login, $password) === false) {
-            throw new \Exception("Credenciais nao aceitas");
+            throw new Exception("Credentials Not Accepted");
         }
         ftp_pasv($this->conection, true);
     }
 
-    public function get($file, $path, $name, $absolutePath = false)
+    /**
+     * @param $file
+     * @param $pathDestination
+     * @param $newName
+     * @return bool
+     * @throws Exception
+     */
+    public function get($file, $pathDestination, $newName = null)
     {
-        $fileRemote = $_ENV['PSTORAGE_WORKDIR_REMOTE'] . '/' . $file;
+        $fileRemote = $this->storage->getWorkdirRemote() . '/' . $file;
 
         $nameFileLocal = basename($file);
-        if ($name !== null) {
-            $nameFileLocal = $name;
+        if ($newName !== null) {
+            $nameFileLocal = $newName;
         }
 
-        $pathFileLocal = $_ENV['PSTORAGE_WORKDIR_LOCAL']. DIRECTORY_SEPARATOR;
-        if ($absolutePath === true) {
-            $pathFileLocal = "";
-        }
+        $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $nameFileLocal;
-        if ($path !== null) {
-            $fileLocal = $pathFileLocal . $this->directorySeparator($path) . DIRECTORY_SEPARATOR . $nameFileLocal;
+        if ($pathDestination !== null) {
+            $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
         }
 
         file_put_contents($fileLocal, '');
@@ -51,37 +71,105 @@ class Ftp implements DriversInterface
             if (file_exists($fileLocal)) {
                 unlink($fileLocal);
             }
-            throw new \Exception("Erro ao baixar o arquivo ".$file);
+            throw new Exception("Error downloading file ".$file);
         }
     }
 
-    public function put($file, $path, $name, $absolutePath = false)
+    /**
+     * @param $file
+     * @param $pathDestination
+     * @param null $newName
+     * @return bool
+     * @throws Exception
+     */
+    public function put($file, $pathDestination = null, $newName = null)
     {
-        $pathFileLocal = $_ENV['PSTORAGE_WORKDIR_LOCAL']. DIRECTORY_SEPARATOR;
-        if ($absolutePath === true) {
-            $pathFileLocal = "";
-        }
+        $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $file;
 
 
-        $nameFileRemote = $file;
-        if ($name !== null) {
-            $nameFileRemote = $name;
+        $nameFileRemote = basename($file);
+        if ($this->containsFile($pathDestination)) {
+            $nameFileRemote = basename($pathDestination);
         }
-        $fileRemote = $_ENV['PSTORAGE_WORKDIR_REMOTE'] . '/' . $nameFileRemote;
-        if ($path !== null) {
-            $fileRemote = $_ENV['PSTORAGE_WORKDIR_REMOTE'] . '/' . $path . '/' . $nameFileRemote;
+        if ($newName !== null) {
+            $nameFileRemote = $newName;
+        }
+
+        $fileRemote = $this->storage->getWorkdirRemote() . '/' . $nameFileRemote;
+        if ($pathDestination !== null) {
+            if ($this->containsFile($pathDestination)) {
+                $fileRemote = $this->storage->getWorkdirRemote() . '/' . $pathDestination;
+            } else {
+                $fileRemote = $this->storage->getWorkdirRemote() . '/' . $pathDestination . '/' . $nameFileRemote;
+            }
         }
 
         if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_BINARY)) {
             return true;
         } else {
-            throw new \Exception("Erro ao enviar o arquivo");
+            throw new Exception("Erro ao enviar o arquivo");
         }
     }
 
+    /**
+     * @param $file
+     * @return false|string
+     * @throws Exception
+     */
+    public function getContent($file)
+    {
+        $pathAux = $this->storage->getWorkdirLocal();
+        $this->storage->setWorkdirLocal(null);
+        $path = __DIR__ . DS . '..' . DS . '..' . DS . 'temp';
+        try {
+            $this->get($file, $path);
+            $this->storage->setWorkdirLocal($pathAux);
+            $content = file_get_contents($path. DS .basename($file));
+            if (file_exists($path. DS .basename($file))) {
+                unlink($path. DS .basename($file));
+            }
+            return $content;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $file
+     * @param $content
+     * @return bool
+     * @throws Exception
+     */
+    public function putContent($file, $content)
+    {
+        $pathAux = $this->storage->getWorkdirLocal();
+        $this->storage->setWorkdirLocal(null);
+
+        $tempFile = md5(rand(0, 99999999));
+        $pathTemp = __DIR__ . DS . '..' . DS . '..' . DS . 'temp';
+        file_put_contents($pathTemp . DS . $tempFile, $content);
+
+        try {
+            $this->put($pathTemp . DS . $tempFile, $file);
+            $this->storage->setWorkdirLocal($pathAux);
+            if (file_exists($pathTemp. DS . $tempFile)) {
+                unlink($pathTemp. DS . $tempFile);
+            }
+            return true;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $file
+     * @param $path
+     * @return bool
+     */
     public function fileExists($file, $path)
     {
+        $path = $this->storage->getWorkdirRemote() . '/' . $path;
         $files = ftp_nlist($this->conection, $path);
         foreach ($files as $f) {
             if ($file == basename($f)) {
@@ -91,8 +179,15 @@ class Ftp implements DriversInterface
         return false;
     }
 
+    /**
+     * @return bool
+     * @throws Exception
+     */
     public function close()
     {
-        ftp_close($this->conection);
+        if (@ftp_close($this->conection) === false) {
+            throw new Exception("Error disconnecting");
+        }
+        return true;
     }
 }

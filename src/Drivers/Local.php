@@ -4,114 +4,107 @@ namespace Proner\Storage\Drivers;
 use Exception;
 use Proner\Storage\StorageTrait;
 
-class Ftp implements DriversInterface
+class Local implements DriversInterface
 {
     use StorageTrait;
 
-    private $workdirLocal;
-    private $workdirRemote;
-    protected $conection;
+    private $storage;
 
-    public function __construct($workdirLocal, $workdirRemote)
+    public function __construct($storage)
     {
-        $this->workdirLocal = $workdirLocal;
-        $this->workdirRemote = $workdirRemote;
+        $this->storage = $storage;
     }
 
     /**
      * @param $host
-     * @throws Exception
+     * @return bool
      */
-    public function connect($host)
+    public function connect($host = null)
     {
-        @$this->conection = ftp_connect($host);
-        if ($this->conection === false) {
-            throw new Exception("Falha ao conectar com o host");
-        }
+        return true;
     }
 
     /**
      * @param $login
      * @param $password
-     * @throws Exception
+     * @return bool
      */
-    public function login($login, $password)
+    public function login($login = null, $password = null)
     {
-        if (@ftp_login($this->conection, $login, $password) === false) {
-            throw new Exception("Credenciais nao aceitas");
-        }
-        ftp_pasv($this->conection, true);
+        return true;
     }
 
     /**
      * @param $file
-     * @param $path
-     * @param $name
-     * @param bool $absolutePath
+     * @param $pathDestination
+     * @param $newName
      * @return bool
      * @throws Exception
      */
-    public function get($file, $path, $name, $absolutePath = false)
+    public function get($file, $pathDestination = null, $newName = null)
     {
-        $fileRemote = $this->workdirRemote . '/' . $file;
-
         $nameFileLocal = basename($file);
-        if ($name !== null) {
-            $nameFileLocal = $name;
+        if ($newName !== null) {
+            $nameFileLocal = $newName;
         }
 
-        $pathFileLocal = $this->workdirLocal. DS;
-        if ($absolutePath === true) {
-            $pathFileLocal = "";
-        }
-        $fileLocal = $pathFileLocal . $nameFileLocal;
-        if ($path !== null) {
-            $fileLocal = $pathFileLocal . $this->directorySeparator($path) . DS . $nameFileLocal;
-        }
-
-        file_put_contents($fileLocal, '');
-
-        if (@ftp_get($this->conection, $fileLocal, $fileRemote, FTP_BINARY)) {
+        $pathDestination = $this->storage->getWorkdirLocal() . $this->directorySeparator($pathDestination);
+        $content = $this->getContent($file);
+        if (file_put_contents($pathDestination . DS . $nameFileLocal, $content) !== false) {
             return true;
-        } else {
-            if (file_exists($fileLocal)) {
-                unlink($fileLocal);
-            }
-            throw new Exception("Erro ao baixar o arquivo ".$file);
         }
+        throw new Exception("Erro ao gravar arquivo no local");
     }
 
     /**
      * @param $file
-     * @param $path
-     * @param $name
-     * @param bool $absolutePath
+     * @param $pathDestination
+     * @param null $newName
      * @return bool
      * @throws Exception
      */
-    public function put($file, $path, $name, $absolutePath = false)
+    public function put($file, $pathDestination = null, $newName = null)
     {
-        $pathFileLocal = $this->workdirLocal. DS;
-        if ($absolutePath === true) {
-            $pathFileLocal = "";
-        }
-        $fileLocal = $pathFileLocal . $file;
+        $nameFileLocal = basename($file);
+        $content = $this->getContent($file);
+        $pathDestination = $this->storage->getWorkdirRemote() . $this->directorySeparator($pathDestination);
 
-
-        $nameFileRemote = $file;
-        if ($name !== null) {
-            $nameFileRemote = $name;
-        }
-        $fileRemote = $this->workdirRemote . '/' . $nameFileRemote;
-        if ($path !== null) {
-            $fileRemote = $this->workdirRemote . '/' . $path . '/' . $nameFileRemote;
+        if ($newName !== null) {
+            $nameFileLocal = $newName;
         }
 
-        if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_BINARY)) {
+        if ($data = file_put_contents($pathDestination . DS . $nameFileLocal, $content) !== false) {
             return true;
-        } else {
-            throw new Exception("Erro ao enviar o arquivo");
         }
+        throw new Exception("Erro ao gravar arquivo no destino");
+    }
+
+    /**
+     * @param $file
+     * @return bool
+     * @throws Exception
+     */
+    public function getContent($file)
+    {
+        $content = file_get_contents($file);
+        if ($content !== false) {
+            return $content;
+        }
+        throw new Exception("Error fetching the contents of ".$file." file");
+    }
+
+    /**
+     * @param $file
+     * @param $content
+     * @return bool
+     * @throws Exception
+     */
+    public function putContent($file, $content)
+    {
+        if (file_put_contents($file, $content)) {
+            return true;
+        }
+        throw new Exception("Error while writing the contents of ".$file." file");
     }
 
     /**
@@ -119,9 +112,14 @@ class Ftp implements DriversInterface
      * @param $path
      * @return bool
      */
-    public function fileExists($file, $path)
+    public function fileExists($file, $path = null)
     {
-        $files = ftp_nlist($this->conection, $path);
+        $dir = $this->storage->getWorkdirRemote();
+        if ($path) {
+            $dir = $this->storage->getWorkdirRemote().$path;
+        }
+
+        $files = scandir($dir);
         foreach ($files as $f) {
             if ($file == basename($f)) {
                 return true;
@@ -131,10 +129,10 @@ class Ftp implements DriversInterface
     }
 
     /**
-     *
+     * @return bool
      */
     public function close()
     {
-        ftp_close($this->conection);
+        return true;
     }
 }

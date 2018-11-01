@@ -2,122 +2,184 @@
 
 namespace Proner\Storage;
 
+use Exception;
 use Proner\Storage\Drivers\Ftp;
+use Proner\Storage\Drivers\Local;
 
 class Storage
 {
     use StorageTrait;
 
+    private $driver;
     private $host;
     private $login;
     private $password;
-    private $driver;
+    private $workdirLocal = "." .DS;
+    private $workdirRemote = ".";
 
-    public function __construct($driver = 'ftp')
+    /**
+     * Storage constructor.
+     * @param string $driver
+     */
+    public function __construct($driver)
     {
+        //TRATAMENTO DO WORKDIR
+        if (@$_ENV['PSTORAGE_WORKDIR_LOCAL'] !== null) {
+            $this->workdirLocal = $this->directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
+        }
+
+        if (@$_ENV['PSTORAGE_WORKDIR_REMOTE'] !== null) {
+            $this->workdirRemote = ".". DS . $_ENV['PSTORAGE_WORKDIR_REMOTE'];
+        }
+
         $this->driver = $driver;
         switch ($driver) {
             case null:
             case 'ftp':
-                $this->driver = new Ftp();
+                $this->driver = new Ftp($this);
+                break;
+            case 'local':
+                $this->driver = new Local($this);
                 break;
             default:
                 echo "driver não encontrato";
         }
-
-        //TRATAMENTO DO WORKDIR
-        if ($_ENV['PSTORAGE_WORKDIR_LOCAL'] !== null) {
-            $_ENV['PSTORAGE_WORKDIR_LOCAL'] = $this->directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
-        }
-        if ($_ENV['PSTORAGE_WORKDIR_LOCAL'] === null) {
-            $_ENV['PSTORAGE_WORKDIR_LOCAL'] = ".";
-        }
-
-        if ($_ENV['PSTORAGE_WORKDIR_REMOTE'] !== null) {
-            $_ENV['PSTORAGE_WORKDIR_REMOTE'] = "./".$_ENV['PSTORAGE_WORKDIR_REMOTE'];
-        }
-        if ($_ENV['PSTORAGE_WORKDIR_REMOTE'] === null) {
-            $_ENV['PSTORAGE_WORKDIR_REMOTE'] = ".";
-        }
     }
 
+    /**
+     * @param $host
+     */
     public function setHost($host)
     {
         $this->host = $host;
     }
 
+    /**
+     * @param $login
+     * @param $password
+     */
     public function setLogin($login, $password)
     {
         $this->login = $login;
         $this->password = $password;
     }
 
+    /**
+     * @return string
+     */
+    public function getWorkdirLocal()
+    {
+        return $this->workdirLocal;
+    }
+
+    /**
+     * @param $workdir
+     */
     public function setWorkdirLocal($workdir)
     {
-        $_ENV['PSTORAGE_WORKDIR_LOCAL'] = $this->directorySeparator($workdir);
+        if ($workdir === null) {
+            $this->workdirLocal = '';
+        } else {
+            $this->workdirLocal = $this->directorySeparator($workdir) . DS;
+        }
     }
 
+    /**
+     * @return string
+     */
+    public function getWorkdirRemote()
+    {
+        return $this->workdirRemote;
+    }
+
+    /**
+     * @param $workdir
+     */
     public function setWorkdirRemote($workdir)
     {
-        $_ENV['PSTORAGE_WORKDIR_REMOTE'] = $workdir;
+        $this->workdirRemote = $this->directorySeparator($workdir);
     }
 
-    public function get($file, $path = null, $name = null, $absolutePath = false)
+    /**
+     * @param $file
+     * @param null $pathDestination
+     * @param null $newName
+     * @return bool
+     * @throws Exception
+     */
+    public function get($file, $pathDestination = null, $newName = null)
     {
         try {
             $this->driver->connect($this->host);
             $this->driver->login($this->login, $this->password);
-            $this->driver->get($file, $path, $name, $absolutePath);
+            $return = $this->driver->get($file, $pathDestination, $newName);
             $this->driver->close();
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            return $return;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
+    /**
+     * @param $file
+     * @return false|string
+     * @throws Exception
+     */
     public function getContent($file)
     {
         try {
-            $tempFile = md5(rand(0, 99999999));
-            $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
-            $this->get($file, $pathTemp, $tempFile, true);
-            $content = file_get_contents($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
-            if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
-                unlink($pathTemp. DIRECTORY_SEPARATOR .$tempFile);
-            }
-            return $content;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            $this->driver->connect($this->host);
+            $this->driver->login($this->login, $this->password);
+            return $this->driver->getContent($file);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
-    public function put($file, $path = null, $name = null, $absolutePath = false)
+    /**
+     * @param $file
+     * @param null $pathDestination
+     * @param null $newName
+     * @return bool
+     * @throws Exception
+     */
+    public function put($file, $pathDestination = null, $newName = null)
     {
         try {
             $this->driver->connect($this->host);
             $this->driver->login($this->login, $this->password);
-            $this->driver->put($file, $path, $name, $absolutePath);
+            $return = $this->driver->put($file, $pathDestination, $newName);
             $this->driver->close();
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            return $return;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
-    public function putContent($content, $file)
+    /**
+     * @param $file
+     * @param $content
+     * @return bool
+     * @throws Exception
+     */
+    public function putContent($file, $content)
     {
         try {
-            $tempFile = md5(rand(0, 99999999));
-            $pathTemp = $this->directorySeparator(__DIR__ . '/../' . 'temp');
-            file_put_contents($pathTemp . DIRECTORY_SEPARATOR . $tempFile, $content);
-            $this->put($pathTemp . DIRECTORY_SEPARATOR. $tempFile, dirname($file), basename($file), true);
-            if (file_exists($pathTemp. DIRECTORY_SEPARATOR .$tempFile)) {
-                unlink($pathTemp . DIRECTORY_SEPARATOR . $tempFile);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            $this->driver->connect($this->host);
+            $this->driver->login($this->login, $this->password);
+            return $this->driver->putContent($file, $content);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
-    public function fileExists($file, $path)
+    /**
+     * @param $file
+     * @param $path
+     * @return bool
+     * @throws Exception
+     */
+    public function fileExists($file, $path = null)
     {
         try {
             $this->driver->connect($this->host);
@@ -125,8 +187,8 @@ class Storage
             $return = $this->driver->fileExists($file, $path);
             $this->driver->close();
             return $return;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 }
