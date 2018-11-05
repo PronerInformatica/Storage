@@ -86,6 +86,19 @@ $storage->fileExists($file, $path);
 Storage::fileExists($file, $path);
 ```
 
+### Método: **getImage**
+Retorna o conteudo da imagem em base64 pronta para o html
+```php
+<?php
+$file = 'teste.jpg'; //Imagem
+
+$storage->getImage($file); // data:image/jpg;base64, /9j/4AA.....
+
+//OU COM MÉTODO ESTATICO
+
+Storage::getImage($file); // data:image/jpg;base64, /9j/4AA.....
+```
+
 ## Variaveis de ambiente
 Variavel para difinir o driver(ftp default)
 ```bash
