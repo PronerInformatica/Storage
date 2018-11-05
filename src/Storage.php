@@ -191,4 +191,34 @@ class Storage
             throw new Exception($e->getMessage());
         }
     }
+
+    /**
+     * @param $file
+     * @return bool
+     * @throws Exception
+     */
+    public function getImage($file)
+    {
+        $extension = $this->getExtensionByName($file);
+        $tempFile = md5(rand(0, 99999999)).'.'.$extension;
+        $pathAux = $this->getWorkdirLocal();
+        $this->setWorkdirLocal(null);
+        try {
+            $this->driver->connect($this->host);
+            $this->driver->login($this->login, $this->password);
+            if (!$this->driver->get($file, TMP_DIR, $tempFile)) {
+                $this->driver->close();
+                return false;
+            }
+            $this->setWorkdirLocal($pathAux);
+            $this->driver->close();
+            $content = base64_encode(file_get_contents(TMP_DIR . DS . $tempFile));
+            if (file_exists(TMP_DIR . DS . $tempFile)) {
+                unlink(TMP_DIR . DS . $tempFile);
+            }
+            return "data:image/$extension;base64, ". $content;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }

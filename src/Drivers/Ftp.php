@@ -48,7 +48,7 @@ class Ftp implements DriversInterface
      * @return bool
      * @throws Exception
      */
-    public function get($file, $pathDestination, $newName = null)
+    public function get($file, $pathDestination = null, $newName = null)
     {
         $fileRemote = $this->storage->getWorkdirRemote() . '/' . $file;
 

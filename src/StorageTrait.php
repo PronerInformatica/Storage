@@ -20,6 +20,15 @@ trait StorageTrait
         return false;
     }
 
+    public function getExtensionByName($file)
+    {
+        $file = basename($file);
+        $rev = strrev($file);
+        $exp = explode('.', $rev);
+        $ext = strrev($exp[0]);
+        return $ext;
+    }
+
     public static function directorySeparatorStatic($path)
     {
         $pathArray = explode('/', $path);

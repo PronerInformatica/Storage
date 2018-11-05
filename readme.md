@@ -10,8 +10,8 @@ $storage = new Storage('ftp');
 $storage->setHost('172.20.15.999');
 $storage->setLogin('usuario','senha');
 
-$storage->setWorkdirLocal('usuario','senha');
-$storage->setWorkdirRemote('usuario','senha');
+$storage->setWorkdirLocal('arquivos');
+$storage->setWorkdirRemote('arquivos');
 ```
  > É possível usar a *Facade*(Métodos estaticos) da lib, mas para isso é preciso estar com as variaveis de ambiente definidas.
 

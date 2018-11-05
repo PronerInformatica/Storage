@@ -132,4 +132,19 @@ class Storage
             throw new \Exception($e->getMessage(), $e->getCode());
         }
     }
+
+    /**
+     * @param $file
+     * @return bool
+     * @throws \Exception
+     */
+    public static function getImage($file)
+    {
+        try {
+            $storage = self::build();
+            return $storage->getImage($file);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(), $e->getCode());
+        }
+    }
 }
