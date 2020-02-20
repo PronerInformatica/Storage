@@ -22,6 +22,7 @@ class Storage
     private $cacheHost;
     private $cachePort;
     private $cacheSecurity;
+    private $cacheLogin;
     private $cachePassword;
     private $cacheTtl = 604800;
 
@@ -128,9 +129,10 @@ class Storage
         $this->cacheHost = $host;
         $this->cachePort = $port;
         $this->cacheSecurity = $security;
+        $this->cacheLogin = $login;
         $this->cachePassword = $password;
         $this->cache = new Redis();
-        $this->cache->connect($host, $port, $security, $password);
+        $this->cache->connect($host, $port, $security, $login, $password);
         $this->setCacheEnable(true);
     }
 
