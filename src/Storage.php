@@ -3,6 +3,7 @@
 namespace Proner\Storage;
 
 use Exception;
+use Proner\Storage\Caches\Redis;
 use Proner\Storage\Drivers\Ftp;
 use Proner\Storage\Drivers\Local;
 
@@ -16,6 +17,13 @@ class Storage
     private $password;
     private $workdirLocal = "." .DS;
     private $workdirRemote = ".";
+    private $cache;
+    private $cacheEnable = false;
+    private $cacheHost;
+    private $cachePort;
+    private $cacheSecurity;
+    private $cachePassword;
+    private $cacheTtl = 604800;
 
     /**
      * Storage constructor.
@@ -101,6 +109,48 @@ class Storage
     }
 
     /**
+     * @param boolean $cache
+     */
+    public function setCacheEnable($cache)
+    {
+        $this->cacheEnable = $cache;
+    }
+
+    /**
+     * @param string $host
+     * @param string $port
+     * @param string $security
+     * @param string $login
+     * @param string $password
+     */
+    public function cacheConnect($host, $port, $security = null, $login = null, $password = null)
+    {
+        $this->cacheHost = $host;
+        $this->cachePort = $port;
+        $this->cacheSecurity = $security;
+        $this->cachePassword = $password;
+        $this->cache = new Redis();
+        $this->cache->connect($host, $port, $security, $password);
+        $this->setCacheEnable(true);
+    }
+
+    private function generateCacheKey($file)
+    {
+        $key = $this->cacheHost;
+        $key .= "_".$this->getWorkdirRemote();
+        $key .= "_".implode("_", explode("/", $file));
+        return $key;
+    }
+
+    /**
+     * @param integer $seconds
+     */
+    public function setCacheTtl($seconds)
+    {
+        $this->cacheTtl = $seconds;
+    }
+
+    /**
      * @param $file
      * @param null $pathDestination
      * @param null $newName
@@ -109,15 +159,50 @@ class Storage
      */
     public function get($file, $pathDestination = null, $newName = null)
     {
+        if ($this->cacheEnable === true) {
+            $cacheKey = $this->generateCacheKey($file);
+            $content = $this->cache->get($cacheKey);
+            if ($content !== null) {
+                $nameFileLocal = basename($file);
+                if ($newName !== null) {
+                    $nameFileLocal = $newName;
+                }
+
+                $pathFileLocal = $this->getWorkdirLocal();
+                $fileLocal = $pathFileLocal . $nameFileLocal;
+                if ($pathDestination !== null) {
+                    $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
+                }
+                file_put_contents($fileLocal, $content);
+                return true;
+            }
+        }
+
         try {
             $this->driver->connect($this->host);
             $this->driver->login($this->login, $this->password);
             $return = $this->driver->get($file, $pathDestination, $newName);
             $this->driver->close();
-            return $return;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
+
+        if ($this->cacheEnable === true) {
+            $nameFileLocal = basename($file);
+            if ($newName !== null) {
+                $nameFileLocal = $newName;
+            }
+
+            $pathFileLocal = $this->getWorkdirLocal();
+            $fileLocal = $pathFileLocal . $nameFileLocal;
+            if ($pathDestination !== null) {
+                $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
+            }
+            $content = file_get_contents($fileLocal);
+            $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
+        }
+
+        return $return;
     }
 
     /**
@@ -127,13 +212,27 @@ class Storage
      */
     public function getContent($file)
     {
+        if ($this->cacheEnable === true) {
+            $cacheKey = $this->generateCacheKey($file);
+            $content = $this->cache->get($cacheKey);
+            if ($content !== null) {
+                return $content;
+            }
+        }
+
         try {
             $this->driver->connect($this->host);
             $this->driver->login($this->login, $this->password);
-            return $this->driver->getContent($file);
+            $content = $this->driver->getContent($file);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
+
+        if ($this->cacheEnable === true) {
+            $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
+        }
+
+        return $content;
     }
 
     /**
@@ -150,10 +249,22 @@ class Storage
             $this->driver->login($this->login, $this->password);
             $return = $this->driver->put($file, $pathDestination, $newName);
             $this->driver->close();
-            return $return;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
+
+        if ($this->cacheEnable === true) {
+            $content = file_get_contents($this->getWorkdirLocal().DS.$file);
+            if ($newName !== null) {
+                $key = $this->generateCacheKey($pathDestination.'/'.$newName);
+            }
+            if ($newName === null) {
+                $key = $this->generateCacheKey($pathDestination.'/'.$file);
+            }
+            $this->cache->set($key, $content, $this->cacheTtl);
+        }
+
+        return $return;
     }
 
     /**
@@ -167,10 +278,17 @@ class Storage
         try {
             $this->driver->connect($this->host);
             $this->driver->login($this->login, $this->password);
-            return $this->driver->putContent($file, $content);
+            $return = $this->driver->putContent($file, $content);
+            $this->driver->close();
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
+
+        if ($this->cacheEnable === true) {
+            $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
+        }
+
+        return $return;
     }
 
     /**

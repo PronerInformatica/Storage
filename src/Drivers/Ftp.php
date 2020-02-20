@@ -87,7 +87,6 @@ class Ftp implements DriversInterface
         $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $file;
 
-
         $nameFileRemote = basename($file);
         if ($this->containsFile($pathDestination)) {
             $nameFileRemote = basename($pathDestination);

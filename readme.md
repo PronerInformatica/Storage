@@ -12,6 +12,9 @@ $storage->setLogin('usuario','senha');
 
 $storage->setWorkdirLocal('arquivos');
 $storage->setWorkdirRemote('arquivos');
+
+//conectar e habilitar o cache
+$storage->cacheConnect('172.20.15.990', 6379);
 ```
  > É possível usar a *Facade*(Métodos estaticos) da lib, mas para isso é preciso estar com as variaveis de ambiente definidas.
 
@@ -100,27 +103,21 @@ Storage::getImage($file); // data:image/jpg;base64, /9j/4AA.....
 ```
 
 ## Variaveis de ambiente
-Variavel para difinir o driver(ftp default)
 ```bash
-PSTORAGE_DRIVER //ftp
-```
-Variavel para difinir o host da conexao
-```
-PSTORAGE_HOST //172.20.15.999
-```
-Variavel para difinir o usuario da conexao com o host
-```
-PSTORAGE_USER //user
-```
-Variavel para difinir a senha da conexao com o host
-```
-PSTORAGE_PASS //password
-```
-Variavel para difinir o diretorio local a onde todas as ações serão execultadas por padrão.
-```
-PSTORAGE_WORKDIR_LOCAL //arquivos
-```
-Variavel para difinir o diretorio remoto a onde todas as ações serão execultadas por padrão.
-```
-PSTORAGE_WORKDIR_REMOTE //arquivos
+//CONEXAO
+PSTORAGE_DRIVER //Define o driver(ftp default)
+PSTORAGE_HOST //Define o host da conexao
+PSTORAGE_USER //Define o usuario da conexao com o host
+PSTORAGE_PASS //Define a senha da conexao com o host
+PSTORAGE_WORKDIR_LOCAL //Define o diretorio local a onde todas as ações serão execultadas por padrão.
+PSTORAGE_WORKDIR_REMOTE //Define o diretorio remoto a onde todas as ações serão execultadas por padrão.
+
+//CACHE
+PSTORAGE_CACHE //Habilita o cache (true ou false)
+PSTORAGE_CACHE_HOST //Define o host do serviço de cache
+PSTORAGE_CACHE_PORT //Define a porta do serviço de cache;
+PSTORAGE_CACHE_SECURITY //Habilita conexão segura com o serviço de cache
+PSTORAGE_CACHE_LOGIN //Define a senha do serviço de cache;
+PSTORAGE_CACHE_PASSWORD //Define a senha do serviço de cache
+PSTORAGE_CACHE_TTL //Define o tempo de vida do cache
 ```

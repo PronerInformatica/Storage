@@ -44,4 +44,9 @@ class StorageTest extends TestCase
         $actual = $this->storage->fileExists('file_test.txt');
         $this->assertEquals(true, $actual);
     }
+
+    public static function tearDownAfterClass()
+    {
+        unlink('file_test.txt');
+    }
 }
