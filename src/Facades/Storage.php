@@ -66,7 +66,7 @@ class Storage
                 self::$storage->setWorkdirRemote($_ENV['PSTORAGE_WORKDIR_REMOTE']);
             }
 
-            if ($_ENV['PSTORAGE_CACHE']) {
+            if ($_ENV['PSTORAGE_CACHE'] === true) {
                 $cacheHost = $_ENV['PSTORAGE_CACHE_HOST'] ?? null;
                 $cachePort = $_ENV['PSTORAGE_CACHE_PORT'] ?? null;
                 $cacheSecurity = $_ENV['PSTORAGE_CACHE_SECURITY'] ?? null;
