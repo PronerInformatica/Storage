@@ -2,6 +2,11 @@
 
 Cliente em PHP para comunicacao com o storage
 
+## Instalação
+```bash
+composer require proner/storage
+```
+
 ## Exemplo
 ```php
 <?php
