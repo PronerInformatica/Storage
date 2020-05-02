@@ -325,11 +325,11 @@ class Storage
         $this->setWorkdirLocal(null);
 
         try {
-            $this->get($file, TMP_DIR, $tempFile);
+            $this->get($file, PS_TMP_DIR, $tempFile);
             $this->setWorkdirLocal($pathAux);
-            $content = base64_encode(file_get_contents(TMP_DIR . DS . $tempFile));
-            if (file_exists(TMP_DIR . DS . $tempFile)) {
-                unlink(TMP_DIR . DS . $tempFile);
+            $content = base64_encode(file_get_contents(PS_TMP_DIR . DS . $tempFile));
+            if (file_exists(PS_TMP_DIR . DS . $tempFile)) {
+                unlink(PS_TMP_DIR . DS . $tempFile);
             }
             return "data:image/$extension;base64, ". $content;
         } catch (Exception $e) {
