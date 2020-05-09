@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types = 1);
 namespace Proner\Storage\Facades;
 
 use Proner\Storage\StorageTrait;
@@ -25,7 +25,7 @@ class Storage
     /**
      * @param $workdir
      */
-    public static function setWorkdirLocal($workdir)
+    public static function setWorkdirLocal(string $workdir)
     {
         $_ENV['PSTORAGE_WORKDIR_LOCAL'] = StorageTrait::directorySeparatorStatic($workdir);
     }
@@ -33,7 +33,7 @@ class Storage
     /**
      * @param $workdir
      */
-    public static function setWorkdirRemote($workdir)
+    public static function setWorkdirRemote(string $workdir)
     {
         $_ENV['PSTORAGE_WORKDIR_REMOTE'] = $workdir;
     }
@@ -46,27 +46,23 @@ class Storage
     {
         if (self::$storage === null) {
             self::$storage = new \Proner\Storage\Storage($_ENV['PSTORAGE_DRIVER']);
-            if ($_ENV['PSTORAGE_HOST']) {
+            if (isset($_ENV['PSTORAGE_HOST'])) {
                 self::$storage->setHost($_ENV['PSTORAGE_HOST']);
-            } else {
-                throw new \Exception("Variavel de ambiente PSTORAGE_HOST nao definida");
             }
 
-            if ($_ENV['PSTORAGE_USER']) {
+            if (isset($_ENV['PSTORAGE_USER'])) {
                 self::$storage->setLogin($_ENV['PSTORAGE_USER'], $_ENV['PSTORAGE_PASS']);
-            } else {
-                throw new \Exception("Variavel de ambiente PSTORAGE_USER nao definida");
             }
 
-            if ($_ENV['PSTORAGE_WORKDIR_LOCAL']) {
+            if (isset($_ENV['PSTORAGE_WORKDIR_LOCAL'])) {
                 self::$storage->setWorkdirLocal($_ENV['PSTORAGE_WORKDIR_LOCAL']);
             }
 
-            if ($_ENV['PSTORAGE_WORKDIR_REMOTE']) {
+            if (isset($_ENV['PSTORAGE_WORKDIR_REMOTE'])) {
                 self::$storage->setWorkdirRemote($_ENV['PSTORAGE_WORKDIR_REMOTE']);
             }
 
-            if ($_ENV['PSTORAGE_CACHE'] === true) {
+            if (isset($_ENV['PSTORAGE_CACHE']) && $_ENV['PSTORAGE_CACHE'] === true) {
                 $cacheHost = $_ENV['PSTORAGE_CACHE_HOST'] ?? null;
                 $cachePort = $_ENV['PSTORAGE_CACHE_PORT'] ?? null;
                 $cacheSecurity = $_ENV['PSTORAGE_CACHE_SECURITY'] ?? null;

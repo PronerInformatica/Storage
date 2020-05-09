@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types = 1);
 namespace Proner\Storage;
 
 use Exception;
@@ -15,7 +15,7 @@ class Storage
     private $host;
     private $login;
     private $password;
-    private $workdirLocal = "." .DS;
+    private $workdirLocal = "." .PS_DS;
     private $workdirRemote = ".";
     private $cache;
     private $cacheEnable = false;
@@ -33,12 +33,12 @@ class Storage
     public function __construct($driver)
     {
         //TRATAMENTO DO WORKDIR
-        if (@$_ENV['PSTORAGE_WORKDIR_LOCAL'] !== null) {
+        if (isset($_ENV['PSTORAGE_WORKDIR_LOCAL'])) {
             $this->workdirLocal = $this->directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
         }
 
-        if (@$_ENV['PSTORAGE_WORKDIR_REMOTE'] !== null) {
-            $this->workdirRemote = ".". DS . $_ENV['PSTORAGE_WORKDIR_REMOTE'];
+        if (isset($_ENV['PSTORAGE_WORKDIR_REMOTE'])) {
+            $this->workdirRemote = ".". PS_DS . $_ENV['PSTORAGE_WORKDIR_REMOTE'];
         }
 
         $this->driver = $driver;
@@ -89,7 +89,7 @@ class Storage
         if ($workdir === null) {
             $this->workdirLocal = '';
         } else {
-            $this->workdirLocal = $this->directorySeparator($workdir) . DS;
+            $this->workdirLocal = $this->directorySeparator($workdir) . PS_DS;
         }
     }
 
@@ -173,7 +173,7 @@ class Storage
                 $pathFileLocal = $this->getWorkdirLocal();
                 $fileLocal = $pathFileLocal . $nameFileLocal;
                 if ($pathDestination !== null) {
-                    $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
+                    $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
                 }
                 file_put_contents($fileLocal, $content);
                 return true;
@@ -198,7 +198,7 @@ class Storage
             $pathFileLocal = $this->getWorkdirLocal();
             $fileLocal = $pathFileLocal . $nameFileLocal;
             if ($pathDestination !== null) {
-                $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
+                $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
             }
             $content = file_get_contents($fileLocal);
             $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
@@ -256,7 +256,7 @@ class Storage
         }
 
         if ($this->cacheEnable === true) {
-            $content = file_get_contents($this->getWorkdirLocal().DS.$file);
+            $content = file_get_contents($this->getWorkdirLocal().PS_DS.$file);
             if ($newName !== null) {
                 $key = $this->generateCacheKey($pathDestination.'/'.$newName);
             }
@@ -327,9 +327,9 @@ class Storage
         try {
             $this->get($file, PS_TMP_DIR, $tempFile);
             $this->setWorkdirLocal($pathAux);
-            $content = base64_encode(file_get_contents(PS_TMP_DIR . DS . $tempFile));
-            if (file_exists(PS_TMP_DIR . DS . $tempFile)) {
-                unlink(PS_TMP_DIR . DS . $tempFile);
+            $content = base64_encode(file_get_contents(PS_TMP_DIR . PS_DS . $tempFile));
+            if (file_exists(PS_TMP_DIR . PS_DS . $tempFile)) {
+                unlink(PS_TMP_DIR . PS_DS . $tempFile);
             }
             return "data:image/$extension;base64, ". $content;
         } catch (Exception $e) {

@@ -1,3 +1,3 @@
 <?php
-@define("DS", DIRECTORY_SEPARATOR);
-define("PS_TMP_DIR", __DIR__ . DS . '..'. DS .'..'. DS .'temp');
+define("PS_DS", DIRECTORY_SEPARATOR);
+define("PS_TMP_DIR", __DIR__ . PS_DS . '..'. PS_DS .'..'. PS_DS .'temp');

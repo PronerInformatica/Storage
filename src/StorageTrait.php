@@ -7,7 +7,7 @@ trait StorageTrait
     public function directorySeparator($path)
     {
         $pathArray = explode('/', $path);
-        $newPath = implode(DS, $pathArray);
+        $newPath = implode(PS_DS, $pathArray);
         return $newPath;
     }
 
@@ -32,7 +32,7 @@ trait StorageTrait
     public static function directorySeparatorStatic($path)
     {
         $pathArray = explode('/', $path);
-        $newPath = implode(DS, $pathArray);
+        $newPath = implode(PS_DS, $pathArray);
         return $newPath;
     }
 }

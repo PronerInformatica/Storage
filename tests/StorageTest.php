@@ -1,5 +1,5 @@
 <?php
-namespace StorageTest;
+namespace Proner\StorageTest;
 
 use PHPUnit\Framework\TestCase;
 use Proner\Storage\Storage;
@@ -11,14 +11,14 @@ class StorageTest extends TestCase
     protected function setUp()
     {
         $this->storage = new Storage('local');
-        $this->storage->setWorkdirLocal(__DIR__ . DS . '..' . DS . 'temp' . DS);
-        $this->storage->setWorkdirRemote(__DIR__ . DS . '..' . DS . 'temp' . DS);
+        $this->storage->setWorkdirLocal(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS);
+        $this->storage->setWorkdirRemote(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS);
     }
 
     public function testPutContentFile()
     {
         $actual = $this->storage->putContent('file_test.txt', 'test passed');
-        $this->assertEquals(true,$actual);
+        $this->assertEquals(true, $actual);
     }
 
     public function testGetFile()
@@ -47,6 +47,7 @@ class StorageTest extends TestCase
 
     public static function tearDownAfterClass()
     {
-        unlink('file_test.txt');
+        unlink(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS . 'file_test.txt');
+        unlink(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS . 'file_test2.txt');
     }
 }

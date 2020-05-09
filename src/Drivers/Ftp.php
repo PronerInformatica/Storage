@@ -1,7 +1,7 @@
 <?php
+declare(strict_types = 1);
 namespace Proner\Storage\Drivers;
 
-use Exception;
 use Proner\Storage\StorageTrait;
 
 class Ftp implements DriversInterface
@@ -18,25 +18,25 @@ class Ftp implements DriversInterface
 
     /**
      * @param $host
-     * @throws Exception
+     * @throws \Exception
      */
-    public function connect($host)
+    public function connect(string $host)
     {
         @$this->conection = ftp_connect($host);
         if ($this->conection === false) {
-            throw new Exception("Failed to connect to host");
+            throw new \Exception("Failed to connect to host");
         }
     }
 
     /**
      * @param $login
      * @param $password
-     * @throws Exception
+     * @throws \Exception
      */
-    public function login($login, $password)
+    public function login(string $login, string $password)
     {
         if (@ftp_login($this->conection, $login, $password) === false) {
-            throw new Exception("Credentials Not Accepted");
+            throw new \Exception("Credentials Not Accepted");
         }
         ftp_pasv($this->conection, true);
     }
@@ -46,7 +46,7 @@ class Ftp implements DriversInterface
      * @param $pathDestination
      * @param $newName
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function get($file, $pathDestination = null, $newName = null)
     {
@@ -60,7 +60,7 @@ class Ftp implements DriversInterface
         $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $nameFileLocal;
         if ($pathDestination !== null) {
-            $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . DS . $nameFileLocal;
+            $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
         }
 
         file_put_contents($fileLocal, '');
@@ -71,7 +71,7 @@ class Ftp implements DriversInterface
             if (file_exists($fileLocal)) {
                 unlink($fileLocal);
             }
-            throw new Exception("Error downloading file ".$file);
+            throw new \Exception("Error downloading file ".$file);
         }
     }
 
@@ -80,7 +80,7 @@ class Ftp implements DriversInterface
      * @param $pathDestination
      * @param null $newName
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function put($file, $pathDestination = null, $newName = null)
     {
@@ -107,30 +107,30 @@ class Ftp implements DriversInterface
         if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_BINARY)) {
             return true;
         } else {
-            throw new Exception("Erro ao enviar o arquivo");
+            throw new \Exception("Erro ao enviar o arquivo");
         }
     }
 
     /**
      * @param $file
      * @return false|string
-     * @throws Exception
+     * @throws \Exception
      */
     public function getContent($file)
     {
         $pathAux = $this->storage->getWorkdirLocal();
         $this->storage->setWorkdirLocal(null);
-        $path = __DIR__ . DS . '..' . DS . '..' . DS . 'temp';
+        $path = __DIR__ . PS_DS . '..' . PS_DS . '..' . PS_DS . 'temp';
         try {
             $this->get($file, $path);
             $this->storage->setWorkdirLocal($pathAux);
-            $content = file_get_contents($path. DS .basename($file));
-            if (file_exists($path. DS .basename($file))) {
-                unlink($path. DS .basename($file));
+            $content = file_get_contents($path. PS_DS .basename($file));
+            if (file_exists($path. PS_DS .basename($file))) {
+                unlink($path. PS_DS .basename($file));
             }
             return $content;
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -138,7 +138,7 @@ class Ftp implements DriversInterface
      * @param $file
      * @param $content
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function putContent($file, $content)
     {
@@ -146,18 +146,18 @@ class Ftp implements DriversInterface
         $this->storage->setWorkdirLocal(null);
 
         $tempFile = md5(rand(0, 99999999));
-        $pathTemp = __DIR__ . DS . '..' . DS . '..' . DS . 'temp';
-        file_put_contents($pathTemp . DS . $tempFile, $content);
+        $pathTemp = __DIR__ . PS_DS . '..' . PS_DS . '..' . PS_DS . 'temp';
+        file_put_contents($pathTemp . PS_DS . $tempFile, $content);
 
         try {
-            $this->put($pathTemp . DS . $tempFile, $file);
+            $this->put($pathTemp . PS_DS . $tempFile, $file);
             $this->storage->setWorkdirLocal($pathAux);
-            if (file_exists($pathTemp. DS . $tempFile)) {
-                unlink($pathTemp. DS . $tempFile);
+            if (file_exists($pathTemp. PS_DS . $tempFile)) {
+                unlink($pathTemp. PS_DS . $tempFile);
             }
             return true;
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -180,12 +180,12 @@ class Ftp implements DriversInterface
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function close()
     {
         if (@ftp_close($this->conection) === false) {
-            throw new Exception("Error disconnecting");
+            throw new \Exception("Error disconnecting");
         }
         return true;
     }

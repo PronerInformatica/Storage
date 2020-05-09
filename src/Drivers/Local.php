@@ -1,7 +1,7 @@
 <?php
+declare(strict_types = 1);
 namespace Proner\Storage\Drivers;
 
-use Exception;
 use Proner\Storage\StorageTrait;
 
 class Local implements DriversInterface
@@ -19,7 +19,7 @@ class Local implements DriversInterface
      * @param $host
      * @return bool
      */
-    public function connect($host = null)
+    public function connect(string $host = null)
     {
         return true;
     }
@@ -29,7 +29,7 @@ class Local implements DriversInterface
      * @param $password
      * @return bool
      */
-    public function login($login = null, $password = null)
+    public function login(string $login = null, string $password = null)
     {
         return true;
     }
@@ -39,7 +39,7 @@ class Local implements DriversInterface
      * @param $pathDestination
      * @param $newName
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function get($file, $pathDestination = null, $newName = null)
     {
@@ -50,10 +50,10 @@ class Local implements DriversInterface
 
         $pathDestination = $this->storage->getWorkdirLocal() . $this->directorySeparator($pathDestination);
         $content = $this->getContent($file);
-        if (file_put_contents($pathDestination . DS . $nameFileLocal, $content) !== false) {
+        if (file_put_contents($pathDestination . PS_DS . $nameFileLocal, $content) !== false) {
             return true;
         }
-        throw new Exception("Erro ao gravar arquivo no local");
+        throw new \Exception("Erro ao gravar arquivo no local");
     }
 
     /**
@@ -61,7 +61,7 @@ class Local implements DriversInterface
      * @param $pathDestination
      * @param null $newName
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function put($file, $pathDestination = null, $newName = null)
     {
@@ -73,38 +73,42 @@ class Local implements DriversInterface
             $nameFileLocal = $newName;
         }
 
-        if ($data = file_put_contents($pathDestination . DS . $nameFileLocal, $content) !== false) {
+        if ($data = file_put_contents($pathDestination . PS_DS . $nameFileLocal, $content) !== false) {
             return true;
         }
-        throw new Exception("Erro ao gravar arquivo no destino");
+        throw new \Exception("Erro ao gravar arquivo no destino");
     }
 
     /**
      * @param $file
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function getContent($file)
     {
+        $remotePath = $this->storage->getWorkdirRemote();
+        $file = $remotePath . PS_DS . $file;
         $content = file_get_contents($file);
         if ($content !== false) {
             return $content;
         }
-        throw new Exception("Error fetching the contents of ".$file." file");
+        throw new \Exception("Error fetching the contents of ".$file." file");
     }
 
     /**
      * @param $file
      * @param $content
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function putContent($file, $content)
     {
+        $remotePath = $this->storage->getWorkdirRemote();
+        $file = $remotePath . PS_DS . $file;
         if (file_put_contents($file, $content)) {
             return true;
         }
-        throw new Exception("Error while writing the contents of ".$file." file");
+        throw new \Exception("Error while writing the contents of ".$file." file");
     }
 
     /**

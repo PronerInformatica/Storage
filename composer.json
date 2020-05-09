@@ -16,6 +16,14 @@
       "src/Helpers/defines.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Proner\\StorageTest\\": "tests/"
+    },
+    "files": [
+      "src/Helpers/defines.php"
+    ]
+  },
   "require": {
     "ext-ftp": "*",
     "ext-redis": "*"
