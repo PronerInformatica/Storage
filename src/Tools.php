@@ -1,17 +1,10 @@
 <?php
-
+declare(strict_types = 1);
 namespace Proner\Storage;
 
-trait StorageTrait
+class Tools
 {
-    public function directorySeparator($path)
-    {
-        $pathArray = explode('/', $path);
-        $newPath = implode(PS_DS, $pathArray);
-        return $newPath;
-    }
-
-    public function containsFile($path)
+    public static function containsFile(string $path)
     {
         $info = pathinfo($path);
         if (isset($info['extension'])) {
@@ -20,7 +13,7 @@ trait StorageTrait
         return false;
     }
 
-    public function getExtensionByName($file)
+    public static function getExtensionByName(string $file)
     {
         $file = basename($file);
         $rev = strrev($file);
@@ -29,7 +22,7 @@ trait StorageTrait
         return $ext;
     }
 
-    public static function directorySeparatorStatic($path)
+    public static function directorySeparator(string $path)
     {
         $pathArray = explode('/', $path);
         $newPath = implode(PS_DS, $pathArray);

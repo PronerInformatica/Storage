@@ -1,11 +1,11 @@
 <?php
-
+declare(strict_types = 1);
 namespace Proner\Storage\Caches;
 
 interface CacheInterface
 {
-    public function connect($host, $port, $security, $login, $password);
-    public function get($key);
-    public function set($key, $value, $expire);
-    public function delete($key);
+    public function connect(string $host, int $port, string $security, string $login, string $password);
+    public function get(string $key);
+    public function set(string $key, string $value, string $expire);
+    public function delete(string $key);
 }

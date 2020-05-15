@@ -2,12 +2,10 @@
 declare(strict_types = 1);
 namespace Proner\Storage\Facades;
 
-use Proner\Storage\StorageTrait;
+use Proner\Storage\Tools;
 
 class Storage
 {
-    use StorageTrait;
-
     private static $storage;
 
     private function __construct()
@@ -23,15 +21,15 @@ class Storage
     }
 
     /**
-     * @param $workdir
+     * @param string $workdir
      */
     public static function setWorkdirLocal(string $workdir)
     {
-        $_ENV['PSTORAGE_WORKDIR_LOCAL'] = StorageTrait::directorySeparatorStatic($workdir);
+        $_ENV['PSTORAGE_WORKDIR_LOCAL'] = Tools::directorySeparator($workdir);
     }
 
     /**
-     * @param $workdir
+     * @param string $workdir
      */
     public static function setWorkdirRemote(string $workdir)
     {
@@ -39,7 +37,6 @@ class Storage
     }
 
     /**
-     * @return \Proner\Storage\Storage
      * @throws \Exception
      */
     private static function build()
@@ -64,22 +61,22 @@ class Storage
 
             if (isset($_ENV['PSTORAGE_CACHE']) && $_ENV['PSTORAGE_CACHE'] === true) {
                 $cacheHost = $_ENV['PSTORAGE_CACHE_HOST'] ?? null;
-                $cachePort = $_ENV['PSTORAGE_CACHE_PORT'] ?? null;
+                $cachePort = (int)$_ENV['PSTORAGE_CACHE_PORT'] ?? null;
                 $cacheSecurity = $_ENV['PSTORAGE_CACHE_SECURITY'] ?? null;
                 $cacheLogin = $_ENV['PSTORAGE_CACHE_LOGIN'] ?? null;
                 $cachePassword = $_ENV['PSTORAGE_CACHE_PASSWORD'] ?? null;
                 self::$storage->cacheConnect($cacheHost, $cachePort, $cacheSecurity, $cacheLogin, $cachePassword);
                 if ($_ENV['PSTORAGE_CACHE_TTL']) {
-                    self::$storage->setCacheTtl = $_ENV['PSTORAGE_CACHE_TTL'];
+                    self::$storage->setCacheTtl((int)$_ENV['PSTORAGE_CACHE_TTL']);
                 }
             }
         }
     }
 
     /**
-     * @param $file
-     * @param null $path
-     * @param null $name
+     * @param string $file
+     * @param string $path
+     * @param string $name
      * @return bool
      * @throws \Exception
      */
@@ -94,7 +91,7 @@ class Storage
     }
 
     /**
-     * @param $file
+     * @param string $file
      * @return false|string
      * @throws \Exception
      */
@@ -109,9 +106,9 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param null $path
-     * @param null $name
+     * @param string $file
+     * @param string $path
+     * @param string $name
      * @return bool
      * @throws \Exception
      */
@@ -126,8 +123,8 @@ class Storage
     }
 
     /**
-     * @param $content
-     * @param $file
+     * @param string $content
+     * @param string $file
      * @throws \Exception
      */
     public static function putContent($content, $file)
@@ -141,8 +138,8 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param $path
+     * @param string $file
+     * @param string $path
      * @return bool
      * @throws \Exception
      */
@@ -157,7 +154,7 @@ class Storage
     }
 
     /**
-     * @param $file
+     * @param string $file
      * @return bool
      * @throws \Exception
      */

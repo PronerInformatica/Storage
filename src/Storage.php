@@ -9,8 +9,6 @@ use Proner\Storage\Drivers\Local;
 
 class Storage
 {
-    use StorageTrait;
-
     private $driver;
     private $host;
     private $login;
@@ -30,11 +28,11 @@ class Storage
      * Storage constructor.
      * @param string $driver
      */
-    public function __construct($driver)
+    public function __construct(string $driver)
     {
         //TRATAMENTO DO WORKDIR
         if (isset($_ENV['PSTORAGE_WORKDIR_LOCAL'])) {
-            $this->workdirLocal = $this->directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
+            $this->workdirLocal = Tools::directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
         }
 
         if (isset($_ENV['PSTORAGE_WORKDIR_REMOTE'])) {
@@ -56,7 +54,7 @@ class Storage
     }
 
     /**
-     * @param $host
+     * @param string $host
      */
     public function setHost($host)
     {
@@ -64,10 +62,10 @@ class Storage
     }
 
     /**
-     * @param $login
-     * @param $password
+     * @param string $login
+     * @param string $password
      */
-    public function setLogin($login, $password)
+    public function setLogin(string $login, string $password)
     {
         $this->login = $login;
         $this->password = $password;
@@ -82,15 +80,11 @@ class Storage
     }
 
     /**
-     * @param $workdir
+     * @param string $workdir
      */
-    public function setWorkdirLocal($workdir)
+    public function setWorkdirLocal(string $workdir)
     {
-        if ($workdir === null) {
-            $this->workdirLocal = '';
-        } else {
-            $this->workdirLocal = $this->directorySeparator($workdir) . PS_DS;
-        }
+        $this->workdirLocal = Tools::directorySeparator($workdir) . PS_DS;
     }
 
     /**
@@ -102,11 +96,11 @@ class Storage
     }
 
     /**
-     * @param $workdir
+     * @param string $workdir
      */
-    public function setWorkdirRemote($workdir)
+    public function setWorkdirRemote(string $workdir)
     {
-        $this->workdirRemote = $this->directorySeparator($workdir);
+        $this->workdirRemote = Tools::directorySeparator($workdir);
     }
 
     /**
@@ -119,18 +113,18 @@ class Storage
 
     /**
      * @param string $host
-     * @param string $port
+     * @param int $port
      * @param string $security
      * @param string $login
      * @param string $password
      */
-    public function cacheConnect($host, $port, $security = null, $login = null, $password = null)
+    public function cacheConnect(string $host, int $port, string $security, string $login, string $password)
     {
         $this->cacheHost = $host;
         $this->cachePort = $port;
-        $this->cacheSecurity = $security;
-        $this->cacheLogin = $login;
-        $this->cachePassword = $password;
+        $this->cacheSecurity = $security ?? null;
+        $this->cacheLogin = $login ?? null;
+        $this->cachePassword = $password ?? null;
         $this->cache = new Redis();
         $this->cache->connect($host, $port, $security, $login, $password);
         $this->setCacheEnable(true);
@@ -153,9 +147,9 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param null $pathDestination
-     * @param null $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws Exception
      */
@@ -173,7 +167,7 @@ class Storage
                 $pathFileLocal = $this->getWorkdirLocal();
                 $fileLocal = $pathFileLocal . $nameFileLocal;
                 if ($pathDestination !== null) {
-                    $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
+                    $fileLocal = $pathFileLocal . Tools::directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
                 }
                 file_put_contents($fileLocal, $content);
                 return true;
@@ -198,7 +192,7 @@ class Storage
             $pathFileLocal = $this->getWorkdirLocal();
             $fileLocal = $pathFileLocal . $nameFileLocal;
             if ($pathDestination !== null) {
-                $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
+                $fileLocal = $pathFileLocal . Tools::directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
             }
             $content = file_get_contents($fileLocal);
             $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
@@ -208,7 +202,7 @@ class Storage
     }
 
     /**
-     * @param $file
+     * @param string $file
      * @return false|string
      * @throws Exception
      */
@@ -238,9 +232,9 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param null $pathDestination
-     * @param null $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws Exception
      */
@@ -259,8 +253,7 @@ class Storage
             $content = file_get_contents($this->getWorkdirLocal().PS_DS.$file);
             if ($newName !== null) {
                 $key = $this->generateCacheKey($pathDestination.'/'.$newName);
-            }
-            if ($newName === null) {
+            } else {
                 $key = $this->generateCacheKey($pathDestination.'/'.$file);
             }
             $this->cache->set($key, $content, $this->cacheTtl);
@@ -270,8 +263,8 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param $content
+     * @param string $file
+     * @param string $content
      * @return bool
      * @throws Exception
      */
@@ -294,8 +287,8 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @param $path
+     * @param string $file
+     * @param string $path
      * @return bool
      * @throws Exception
      */
@@ -313,14 +306,14 @@ class Storage
     }
 
     /**
-     * @param $file
-     * @return bool
+     * @param string $file
+     * @return string
      * @throws Exception
      */
-    public function getImage($file)
+    public function getImage(string $file)
     {
-        $extension = $this->getExtensionByName($file);
-        $tempFile = md5(rand(0, 99999999)).'.'.$extension;
+        $extension = Tools::getExtensionByName($file);
+        $tempFile = md5((string)rand(0, 99999999)).'.'.$extension;
         $pathAux = $this->getWorkdirLocal();
         $this->setWorkdirLocal(null);
 

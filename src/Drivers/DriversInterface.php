@@ -8,7 +8,7 @@ interface DriversInterface
     public function login(string $login, string $password);
     public function get($file, $path, $name);
     public function getContent($file);
-    public function put($file, $path, $name);
+    public function put(string $file, string $path, string $name);
     public function putContent($file, $content);
     public function fileExists($file, $path);
     public function close();

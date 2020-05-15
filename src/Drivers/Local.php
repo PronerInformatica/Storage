@@ -2,12 +2,10 @@
 declare(strict_types = 1);
 namespace Proner\Storage\Drivers;
 
-use Proner\Storage\StorageTrait;
+use Proner\Storage\Tools;
 
 class Local implements DriversInterface
 {
-    use StorageTrait;
-
     private $storage;
 
     public function __construct($storage)
@@ -16,7 +14,7 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $host
+     * @param string $host
      * @return bool
      */
     public function connect(string $host = null)
@@ -25,8 +23,8 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $login
-     * @param $password
+     * @param string $login
+     * @param string $password
      * @return bool
      */
     public function login(string $login = null, string $password = null)
@@ -35,9 +33,9 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $pathDestination
-     * @param $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws \Exception
      */
@@ -48,7 +46,7 @@ class Local implements DriversInterface
             $nameFileLocal = $newName;
         }
 
-        $pathDestination = $this->storage->getWorkdirLocal() . $this->directorySeparator($pathDestination);
+        $pathDestination = $this->storage->getWorkdirLocal() . Tools::directorySeparator($pathDestination);
         $content = $this->getContent($file);
         if (file_put_contents($pathDestination . PS_DS . $nameFileLocal, $content) !== false) {
             return true;
@@ -57,17 +55,17 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $pathDestination
-     * @param null $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws \Exception
      */
-    public function put($file, $pathDestination = null, $newName = null)
+    public function put(string $file, string $pathDestination = null, string $newName = null)
     {
         $nameFileLocal = basename($file);
         $content = $this->getContent($file);
-        $pathDestination = $this->storage->getWorkdirRemote() . $this->directorySeparator($pathDestination);
+        $pathDestination = $this->storage->getWorkdirRemote() . Tools::directorySeparator($pathDestination);
 
         if ($newName !== null) {
             $nameFileLocal = $newName;
@@ -80,8 +78,8 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @return bool
+     * @param string $file
+     * @return string
      * @throws \Exception
      */
     public function getContent($file)
@@ -96,8 +94,8 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $content
+     * @param string $file
+     * @param string $content
      * @return bool
      * @throws \Exception
      */
@@ -112,8 +110,8 @@ class Local implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $path
+     * @param string $file
+     * @param string $path
      * @return bool
      */
     public function fileExists($file, $path = null)

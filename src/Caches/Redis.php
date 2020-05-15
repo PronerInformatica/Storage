@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types = 1);
 namespace Proner\Storage\Caches;
 
 class Redis implements CacheInterface
@@ -18,7 +18,7 @@ class Redis implements CacheInterface
      * @param string $login
      * @param string $password
      */
-    public function connect($host, $port, $security = null, $login = null, $password = null)
+    public function connect(string $host, int $port, string $security, string $login, string $password)
     {
         if (!empty($security)) {
             $this->redis->connect("tls://".$host, $port);
@@ -32,9 +32,9 @@ class Redis implements CacheInterface
 
     /**
      * @param string $key
-     * @return string
+     * @return string|null
      */
-    public function get($key)
+    public function get(string $key)
     {
         $value = base64_decode($this->redis->get($key));
         if (empty($value)) {
@@ -48,7 +48,7 @@ class Redis implements CacheInterface
      * @param string $value
      * @param string $expire
      */
-    public function set($key, $value, $expire = null)
+    public function set(string $key, string $value, string $expire = null)
     {
         if (empty($expire)) {
             $this->redis->set($key, base64_encode($value));
@@ -61,7 +61,7 @@ class Redis implements CacheInterface
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key)
     {
         return (boolean)$this->redis->del($key);
     }

@@ -2,12 +2,10 @@
 declare(strict_types = 1);
 namespace Proner\Storage\Drivers;
 
-use Proner\Storage\StorageTrait;
+use Proner\Storage\Tools;
 
 class Ftp implements DriversInterface
 {
-    use StorageTrait;
-
     private $storage;
     private $conection;
 
@@ -17,7 +15,7 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $host
+     * @param string $host
      * @throws \Exception
      */
     public function connect(string $host)
@@ -29,8 +27,8 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $login
-     * @param $password
+     * @param string $login
+     * @param string $password
      * @throws \Exception
      */
     public function login(string $login, string $password)
@@ -42,9 +40,9 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $pathDestination
-     * @param $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws \Exception
      */
@@ -60,7 +58,7 @@ class Ftp implements DriversInterface
         $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $nameFileLocal;
         if ($pathDestination !== null) {
-            $fileLocal = $pathFileLocal . $this->directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
+            $fileLocal = $pathFileLocal . Tools::directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
         }
 
         file_put_contents($fileLocal, '');
@@ -76,19 +74,19 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $pathDestination
-     * @param null $newName
+     * @param string $file
+     * @param string $pathDestination
+     * @param string $newName
      * @return bool
      * @throws \Exception
      */
-    public function put($file, $pathDestination = null, $newName = null)
+    public function put(string $file, string $pathDestination = null, string $newName = null)
     {
         $pathFileLocal = $this->storage->getWorkdirLocal();
         $fileLocal = $pathFileLocal . $file;
 
         $nameFileRemote = basename($file);
-        if ($this->containsFile($pathDestination)) {
+        if (Tools::containsFile($pathDestination)) {
             $nameFileRemote = basename($pathDestination);
         }
         if ($newName !== null) {
@@ -97,7 +95,7 @@ class Ftp implements DriversInterface
 
         $fileRemote = $this->storage->getWorkdirRemote() . '/' . $nameFileRemote;
         if ($pathDestination !== null) {
-            if ($this->containsFile($pathDestination)) {
+            if (Tools::containsFile($pathDestination)) {
                 $fileRemote = $this->storage->getWorkdirRemote() . '/' . $pathDestination;
             } else {
                 $fileRemote = $this->storage->getWorkdirRemote() . '/' . $pathDestination . '/' . $nameFileRemote;
@@ -112,7 +110,7 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $file
+     * @param string $file
      * @return false|string
      * @throws \Exception
      */
@@ -135,8 +133,8 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $content
+     * @param string $file
+     * @param string $content
      * @return bool
      * @throws \Exception
      */
@@ -145,7 +143,7 @@ class Ftp implements DriversInterface
         $pathAux = $this->storage->getWorkdirLocal();
         $this->storage->setWorkdirLocal(null);
 
-        $tempFile = md5(rand(0, 99999999));
+        $tempFile = md5((string)rand(0, 99999999));
         $pathTemp = __DIR__ . PS_DS . '..' . PS_DS . '..' . PS_DS . 'temp';
         file_put_contents($pathTemp . PS_DS . $tempFile, $content);
 
@@ -162,8 +160,8 @@ class Ftp implements DriversInterface
     }
 
     /**
-     * @param $file
-     * @param $path
+     * @param string $file
+     * @param string $path
      * @return bool
      */
     public function fileExists($file, $path)
