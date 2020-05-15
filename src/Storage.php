@@ -126,7 +126,13 @@ class Storage
         $this->cacheLogin = $login ?? null;
         $this->cachePassword = $password ?? null;
         $this->cache = new Redis();
-        $this->cache->connect($host, $port, $security, $login, $password);
+        $this->cache->connect(
+            $this->cacheHost,
+            $this->cachePort,
+            $this->cacheSecurity,
+            $this->cacheLogin,
+            $this->cachePassword
+        );
         $this->setCacheEnable(true);
     }
 
