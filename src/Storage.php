@@ -114,12 +114,17 @@ class Storage
     /**
      * @param string $host
      * @param int $port
-     * @param string $security
-     * @param string $login
-     * @param string $password
+     * @param string|null $security
+     * @param string|null $login
+     * @param string|null $password
      */
-    public function cacheConnect(string $host, int $port, string $security, string $login, string $password)
-    {
+    public function cacheConnect(
+        string $host,
+        int $port,
+        string $security = null,
+        string $login = null,
+        string $password = null
+    ) {
         $this->cacheHost = $host;
         $this->cachePort = $port;
         $this->cacheSecurity = $security ?? null;
