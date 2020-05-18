@@ -51,7 +51,7 @@ class Redis implements CacheInterface
     /**
      * @param string $key
      * @param string $value
-     * @param int|null $expire
+     * @param int $expire
      */
     public function set(string $key, string $value, int $expire = null)
     {

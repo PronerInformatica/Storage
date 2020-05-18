@@ -212,7 +212,7 @@ class Storage
                 $fileLocal = $pathFileLocal . Tools::directorySeparator($pathDestination) . PS_DS . $nameFileLocal;
             }
             $content = file_get_contents($fileLocal);
-            $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
+            $this->cache->set($cacheKey, $content, $this->cacheTtl);
         }
 
         return $return;
@@ -242,7 +242,7 @@ class Storage
         }
 
         if ($this->cacheEnable === true) {
-            $this->cache->set($this->generateCacheKey($file), $content, $this->cacheTtl);
+            $this->cache->set($cacheKey, $content, $this->cacheTtl);
         }
 
         return $content;
