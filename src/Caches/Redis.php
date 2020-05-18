@@ -18,8 +18,13 @@ class Redis implements CacheInterface
      * @param string $login
      * @param string $password
      */
-    public function connect(string $host, int $port, string $security, string $login, string $password)
-    {
+    public function connect(
+        string $host,
+        int $port,
+        string $security = null,
+        string $login = null,
+        string $password = null
+    ) {
         if (!empty($security)) {
             $this->redis->connect("tls://".$host, $port);
         } else {
@@ -36,7 +41,7 @@ class Redis implements CacheInterface
      */
     public function get(string $key)
     {
-        $value = base64_decode($this->redis->get($key));
+        $value = base64_decode((string)$this->redis->get($key));
         if (empty($value)) {
             return null;
         }

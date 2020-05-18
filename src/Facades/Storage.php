@@ -25,7 +25,7 @@ class Storage
      */
     public static function setWorkdirLocal(string $workdir)
     {
-        $_ENV['PSTORAGE_WORKDIR_LOCAL'] = Tools::directorySeparator($workdir);
+        self::$storage->setWorkdirLocal($workdir);
     }
 
     /**
@@ -33,7 +33,7 @@ class Storage
      */
     public static function setWorkdirRemote(string $workdir)
     {
-        $_ENV['PSTORAGE_WORKDIR_REMOTE'] = $workdir;
+        self::$storage->setWorkdirRemote($workdir);
     }
 
     /**
@@ -71,6 +71,7 @@ class Storage
                 }
             }
         }
+        return self::$storage;
     }
 
     /**
@@ -83,8 +84,8 @@ class Storage
     public static function get($file, $path = null, $name = null)
     {
         try {
-            self::build();
-            return self::$storage->get($file, $path, $name);
+            $storage = self::build();
+            return $storage->get($file, $path, $name);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -98,8 +99,8 @@ class Storage
     public static function getContent($file)
     {
         try {
-            self::build();
-            return self::$storage->getContent($file);
+            $storage = self::build();
+            return $storage->getContent($file);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -115,8 +116,8 @@ class Storage
     public static function put($file, $path = null, $name = null)
     {
         try {
-            self::build();
-            return self::$storage->put($file, $path, $name);
+            $storage = self::build();
+            return $storage->put($file, $path, $name);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -130,8 +131,8 @@ class Storage
     public static function putContent($content, $file)
     {
         try {
-            self::build();
-            self::$storage->putContent($content, $file);
+            $storage = self::build();
+            $storage->putContent($content, $file);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -146,8 +147,8 @@ class Storage
     public static function fileExists($file, $path)
     {
         try {
-            self::build();
-            return self::$storage->fileExists($file, $path);
+            $storage = self::build();
+            return $storage->fileExists($file, $path);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -161,8 +162,8 @@ class Storage
     public static function getImage($file)
     {
         try {
-            self::build();
-            return self::$storage->getImage($file);
+            $storage = self::build();
+            return $storage->getImage($file);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }

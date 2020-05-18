@@ -32,11 +32,11 @@ class Storage
     {
         //TRATAMENTO DO WORKDIR
         if (isset($_ENV['PSTORAGE_WORKDIR_LOCAL'])) {
-            $this->workdirLocal = Tools::directorySeparator($_ENV['PSTORAGE_WORKDIR_LOCAL']);
+            $this->setWorkdirLocal($_ENV['PSTORAGE_WORKDIR_LOCAL']);
         }
 
         if (isset($_ENV['PSTORAGE_WORKDIR_REMOTE'])) {
-            $this->workdirRemote = ".". PS_DS . $_ENV['PSTORAGE_WORKDIR_REMOTE'];
+            $this->setWorkdirRemote(".". PS_DS . $_ENV['PSTORAGE_WORKDIR_REMOTE']);
         }
 
         $this->driver = $driver;
@@ -82,9 +82,15 @@ class Storage
     /**
      * @param string $workdir
      */
-    public function setWorkdirLocal(string $workdir)
+    public function setWorkdirLocal($workdir)
     {
-        $this->workdirLocal = Tools::directorySeparator($workdir) . PS_DS;
+
+        if (!is_string($workdir)) {
+            echo "<pre>";
+            debug_print_backtrace();
+            echo "</pre>";
+        }
+        $this->workdirLocal = Tools::directorySeparator($workdir);
     }
 
     /**
@@ -121,15 +127,15 @@ class Storage
     public function cacheConnect(
         string $host,
         int $port,
-        string $security = null,
-        string $login = null,
-        string $password = null
+        $security = null,
+        $login = null,
+        $password = null
     ) {
         $this->cacheHost = $host;
         $this->cachePort = $port;
-        $this->cacheSecurity = $security ?? null;
-        $this->cacheLogin = $login ?? null;
-        $this->cachePassword = $password ?? null;
+        $this->cacheSecurity = $security;
+        $this->cacheLogin = $login;
+        $this->cachePassword = $password;
         $this->cache = new Redis();
         $this->cache->connect(
             $this->cacheHost,
@@ -326,7 +332,7 @@ class Storage
         $extension = Tools::getExtensionByName($file);
         $tempFile = md5((string)rand(0, 99999999)).'.'.$extension;
         $pathAux = $this->getWorkdirLocal();
-        $this->setWorkdirLocal(null);
+        $this->setWorkdirLocal('');
 
         try {
             $this->get($file, PS_TMP_DIR, $tempFile);

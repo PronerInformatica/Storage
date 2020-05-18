@@ -65,6 +65,7 @@ class Local implements DriversInterface
     {
         $nameFileLocal = basename($file);
         $content = $this->getContent($file);
+        var_dump(is_string($pathDestination));
         $pathDestination = $this->storage->getWorkdirRemote() . Tools::directorySeparator($pathDestination);
 
         if ($newName !== null) {
