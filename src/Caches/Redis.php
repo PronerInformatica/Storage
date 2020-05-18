@@ -56,9 +56,9 @@ class Redis implements CacheInterface
     public function set(string $key, string $value, string $expire = null)
     {
         if (empty($expire)) {
-            $this->redis->set($key, base64_encode($value));
+            $this->redis->set($key, base64_encode((string)$value));
         } else {
-            $this->redis->setEx($key, $expire, base64_encode($value));
+            $this->redis->setEx($key, $expire, base64_encode((string)$value));
         }
     }
 
