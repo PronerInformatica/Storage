@@ -51,9 +51,9 @@ class Redis implements CacheInterface
     /**
      * @param string $key
      * @param string $value
-     * @param string $expire
+     * @param int|null $expire
      */
-    public function set(string $key, string $value, string $expire = null)
+    public function set(string $key, string $value, int $expire = null)
     {
         if (empty($expire)) {
             $this->redis->set($key, base64_encode((string)$value));
