@@ -22,8 +22,11 @@ class Tools
         return $ext;
     }
 
-    public static function directorySeparator(string $path)
+    public static function directorySeparator(string $path = null)
     {
+        if ($path === null) {
+            return null;
+        }
         $pathArray = explode('/', $path);
         $newPath = implode(PS_DS, $pathArray);
         return $newPath;

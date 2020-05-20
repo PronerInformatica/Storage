@@ -84,12 +84,6 @@ class Storage
      */
     public function setWorkdirLocal($workdir)
     {
-
-        if (!is_string($workdir)) {
-            echo "<pre>";
-            debug_print_backtrace();
-            echo "</pre>";
-        }
         $this->workdirLocal = Tools::directorySeparator($workdir);
     }
 
@@ -172,6 +166,8 @@ class Storage
      */
     public function get($file, $pathDestination = null, $newName = null)
     {
+        $cacheKey = null;
+
         if ($this->cacheEnable === true) {
             $cacheKey = $this->generateCacheKey($file);
             $content = $this->cache->get($cacheKey);
@@ -225,6 +221,8 @@ class Storage
      */
     public function getContent($file)
     {
+        $cacheKey = null;
+
         if ($this->cacheEnable === true) {
             $cacheKey = $this->generateCacheKey($file);
             $content = $this->cache->get($cacheKey);
@@ -332,7 +330,7 @@ class Storage
         $extension = Tools::getExtensionByName($file);
         $tempFile = md5((string)rand(0, 99999999)).'.'.$extension;
         $pathAux = $this->getWorkdirLocal();
-        $this->setWorkdirLocal('');
+        $this->setWorkdirLocal(null);
 
         try {
             $this->get($file, PS_TMP_DIR, $tempFile);
