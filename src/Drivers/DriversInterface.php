@@ -11,5 +11,6 @@ interface DriversInterface
     public function put(string $file, string $path, string $name);
     public function putContent($file, $content);
     public function fileExists($file, $path);
+    public function delete(string $file);
     public function close();
 }

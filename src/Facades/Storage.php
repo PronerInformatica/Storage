@@ -168,4 +168,19 @@ class Storage
             throw new \Exception($e->getMessage(), $e->getCode());
         }
     }
+
+    /**
+     * @param string $file
+     * @return bool
+     * @throws \Exception
+     */
+    public static function delete($file)
+    {
+        try {
+            $storage = self::build();
+            return $storage->delete($file);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(), $e->getCode());
+        }
+    }
 }

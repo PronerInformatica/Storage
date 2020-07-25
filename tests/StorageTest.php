@@ -45,9 +45,14 @@ class StorageTest extends TestCase
         $this->assertEquals(true, $actual);
     }
 
+    public function testDeleteFile()
+    {
+        $actual = $this->storage->delete('file_test2.txt');
+        $this->assertEquals(true, $actual);
+    }
+
     public static function tearDownAfterClass()
     {
         unlink(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS . 'file_test.txt');
-        unlink(__DIR__ . PS_DS . '..' . PS_DS . 'temp' . PS_DS . 'file_test2.txt');
     }
 }

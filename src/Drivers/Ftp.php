@@ -177,6 +177,23 @@ class Ftp implements DriversInterface
     }
 
     /**
+     * @param string $file
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete(string $file)
+    {
+        $path = $this->storage->getWorkdirLocal();
+        $file = $path.PS_DS.$file;
+
+        if (@ftp_delete($this->conection, $file)) {
+            return true;
+        } else {
+            throw new \Exception("Error delete file ".$file);
+        }
+    }
+
+    /**
      * @return bool
      * @throws \Exception
      */

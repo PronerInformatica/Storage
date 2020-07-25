@@ -141,6 +141,10 @@ class Storage
         $this->setCacheEnable(true);
     }
 
+    /**
+     * @param string $file
+     * @return string
+     */
     private function generateCacheKey($file)
     {
         $key = $this->cacheHost;
@@ -340,6 +344,22 @@ class Storage
                 unlink(PS_TMP_DIR . PS_DS . $tempFile);
             }
             return "data:image/$extension;base64, ". $content;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $file
+     * @return bool
+     * @throws Exception
+     */
+    public function delete(string $file)
+    {
+        try {
+            $this->driver->connect($this->host);
+            $this->driver->login($this->login, $this->password);
+            return $this->driver->delete($file);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

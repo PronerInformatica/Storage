@@ -65,7 +65,6 @@ class Local implements DriversInterface
     {
         $nameFileLocal = basename($file);
         $content = $this->getContent($file);
-        var_dump(is_string($pathDestination));
         $pathDestination = $this->storage->getWorkdirRemote() . Tools::directorySeparator($pathDestination);
 
         if ($newName !== null) {
@@ -129,6 +128,23 @@ class Local implements DriversInterface
             }
         }
         return false;
+    }
+
+    /**
+     * @param string $file
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete(string $file)
+    {
+        $path = $this->storage->getWorkdirRemote();
+        $file = $path.PS_DS.$file;
+
+        if (unlink($file)) {
+            return true;
+        } else {
+            throw new \Exception("Error delete file ".$file);
+        }
     }
 
     /**
