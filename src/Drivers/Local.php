@@ -7,7 +7,12 @@ use Proner\Storage\Tools;
 class Local implements DriversInterface
 {
     private $storage;
+    private $tempFile;
 
+    /**
+     * Local constructor.
+     * @param $storage
+     */
     public function __construct($storage)
     {
         $this->storage = $storage;
@@ -72,6 +77,7 @@ class Local implements DriversInterface
         }
 
         if ($data = file_put_contents($pathDestination . PS_DS . $nameFileLocal, $content) !== false) {
+            $this->tempFile = file_get_contents($pathDestination . PS_DS . $nameFileLocal);
             return true;
         }
         throw new \Exception("Erro ao gravar arquivo no destino");
@@ -128,6 +134,14 @@ class Local implements DriversInterface
             }
         }
         return false;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTempFile()
+    {
+        return $this->tempFile;
     }
 
     /**

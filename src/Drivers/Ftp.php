@@ -8,7 +8,12 @@ class Ftp implements DriversInterface
 {
     private $storage;
     private $conection;
+    private $tempFile;
 
+    /**
+     * Ftp constructor.
+     * @param $storage
+     */
     public function __construct($storage)
     {
         $this->storage = $storage;
@@ -103,6 +108,7 @@ class Ftp implements DriversInterface
         }
 
         if (@ftp_put($this->conection, $fileRemote, $fileLocal, FTP_BINARY)) {
+            $this->tempFile = file_get_contents($fileLocal);
             return true;
         } else {
             throw new \Exception("Erro ao enviar o arquivo");
@@ -174,6 +180,14 @@ class Ftp implements DriversInterface
             }
         }
         return false;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTempFile()
+    {
+        return $this->tempFile;
     }
 
     /**

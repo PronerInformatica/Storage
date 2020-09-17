@@ -12,5 +12,6 @@ interface DriversInterface
     public function putContent($file, $content);
     public function fileExists($file, $path);
     public function delete(string $file);
+    public function getContentTempFile();
     public function close();
 }

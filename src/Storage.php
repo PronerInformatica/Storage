@@ -269,7 +269,7 @@ class Storage
         }
 
         if ($this->cacheEnable === true) {
-            $content = file_get_contents($this->getWorkdirLocal().PS_DS.$file);
+            $content = $this->driver->getContentTempFile();
             if ($newName !== null) {
                 $key = $this->generateCacheKey($pathDestination.'/'.$newName);
             } else {
