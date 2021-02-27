@@ -15,11 +15,7 @@ class Storage
     private function __clone()
     {
     }
-
-    private function __wakeup()
-    {
-    }
-
+    
     /**
      * @param string $workdir
      */
